@@ -1,0 +1,64 @@
+/*
+20161104A -- Analog to Digital Conversion (ADC) on AVR. First Look.
+
+Problem Statement:
+AVR microcontrollers has inbuilt ADC facility to convert analog voltages into a discrete integer -- a 10-bit number ranging from 0 to 1023. 
+1023 represents the RV (reference voltage), thus 512 represents RV/2. Demonstrate this by controlling 2 LEDs, lighting one to indicate the ADC
+value range.
+
+Method:
+
+Hardware:
+Device:			Atmega3164P
+Crystal:		16MHz
+Timer Prescale:	
+LOW Fuse:		0xFF
+HIGH Fuse:		0xC9
+EXTENDED FUSE:	0x7F
+
+http://maxembedded.com/2011/06/the-adc-of-the-avr/
+
+			
+*/
+
+#define F_CPU 16000000
+#include <avr/io.h>
+#define PORT_ON(port,pin) port |= (1<<pin)
+#define PORT_OFF(port,pin) port &= ~(1<<pin)
+#define BEGIN	{
+#define END		}	
+
+int main(void)
+BEGIN
+	unsigned int ADCValue;	// Variable to hold ADC result
+	DDRD=0xFF;				// Set Port A as Output
+	PORTD = 0x00;			// A Pins Low
+	
+	ADMUX = (1<<REFS0);  // AVCC with external capacitor at AREF pin. Also MUX4:0, take the 0 default for ADC0.
+	
+	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); 
+	// ADEN: Set to turn on ADC. By default it is turned off.
+	// ADPS2: ADPS2 and ADPS0 set to invoke prescaler at 128
+	
+
+	while (1)
+	BEGIN
+		ADCSRA |= (1<<ADSC); // In Free Running mode, write this bit to 1 to start conversion
+		
+		// wait for conversion to complete...then ADSC becomes ’0′ again...till then, run loop continuously
+		while(ADCSRA & (1<<ADSC));
+				
+		ADCValue = ADC; //Store ADC value
+		
+		if (ADCValue < 512)
+		BEGIN
+			PORT_OFF(PORTD,7); // Toggle LEDs
+			PORT_ON (PORTD,6);
+		END	
+		else
+		BEGIN
+			PORT_ON(PORTD,7); // Toggle LEDs
+			PORT_OFF (PORTD,6);
+		END
+	END
+END
