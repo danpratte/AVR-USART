@@ -1,5 +1,5 @@
 /*
-20161104A -- Analog to Digital Conversion (ADC) on AVR. First Look.
+20161104A -- ADC on AVR. First Look.
 
 Problem Statement:
 AVR microcontrollers has inbuilt ADC facility to convert analog voltages into a discrete integer -- a 10-bit number ranging from 0 to 1023. 
